@@ -1,4 +1,7 @@
 #!/usr/bin/python3
+"""
+    pascal's triangle algorithm in python.
+"""
 
 def pascal_triangle(n):
     big = []
