@@ -3,6 +3,7 @@
     pascal's triangle algorithm in python.
 """
 
+
 def pascal_triangle(n):
     """ function itself """
 
