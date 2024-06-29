@@ -4,6 +4,8 @@
 """
 
 def pascal_triangle(n):
+    """ function itself """
+
     big = []
     if n <= 0:
         return big
