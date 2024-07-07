@@ -2,16 +2,19 @@
 ''' lockboxes solver program '''
 
 
+from collections import deque
+
+
 def canUnlockAll(boxes):
     ''' the function '''
-    def recurse(n, open_boxes):
-        ''' recursive function '''
-        if n in open_boxes:
-            return
-        open_boxes.add(n)
-        for i in boxes[n]:
-            if i < len(boxes):
-                recurse(i, open_boxes)
     open_boxes = set()
-    recurse(0, open_boxes)
+    queue = deque([0])
+
+    while queue:
+        box = queue.popleft()
+        if box not in open_boxes:
+            open_boxes.add(box)
+            for key in boxes[box]:
+                if key < len(boxes) and key not in open_boxes:
+                    queue.append(key)
     return len(open_boxes) == len(boxes)
