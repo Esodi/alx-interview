@@ -10,6 +10,6 @@ def validUTF8(data):
     byt = bytes(data)
     try:
         byt.decode('utf-8')
-        retrun True
+        return True
     except UnicodeDecodeError:
         return False
