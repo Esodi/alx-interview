@@ -1,46 +1,44 @@
 #!/usr/bin/python3
 '''
- script that reads stdin line by line and computes metrics
+Script that reads stdin line by line and computes metrics.
 '''
 
-import os
 import sys
 import signal
 import re
 
-
 def exiting(sig, frame):
-    ''' func for ctrl + c '''
+    '''Handle SIGINT (Ctrl+C) to print results before exiting.'''
     for k, v in dct.items():
         if v > 0:
             print(f'{k}: {v}')
-    print('File size: {}'.format(s))
+    print(f'File size: {s}')
     sys.exit(0)
-
 
 signal.signal(signal.SIGINT, exiting)
 
-
 c, s = 0, 0
-nlst = []
 dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-pat = r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ - \[([0-9]+-[0-9]+-[0-9]+\s[0-9]+:[0-9]+:[0-9]+\.[0-9]+)\] "GET /projects/260 HTTP/1.1" [0-9]+ [0-9]+'
-for i in sys.stdin:
-    line = i.strip()
-    if re.match(pat, line):
-        lst = line.split(' ')
-        s += int(lst[-1])
-        code = int(lst[-2])
-        nlst.append(code)
-        if code in dct:
-            v = int(dct[code]) + 1
-            dct[code] = v
+pat = re.compile(
+    r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ - \[([0-9]+-[0-9]+-[0-9]+\s[0-9]+:[0-9]+:[0-9]+\.[0-9]+)\] "GET /projects/260 HTTP/1.1" ([0-9]+) ([0-9]+)'
+)
+
+for line in sys.stdin:
+    line = line.strip()
+    match = pat.match(line)
+    if match:
+        status_code = int(match.group(2))
+        file_size = int(match.group(3))
+        s += file_size
+        if status_code in dct:
+            dct[status_code] += 1
         c += 1
-        if c == 10:
+        if c % 10 == 0:
             for k, v in dct.items():
                 if v > 0:
                     print(f'{k}: {v}')
-            print('File size: {}'.format(s))
-            c = 0
-            s = 0
+            print(f'File size: {s}')
+            # Note: Resetting the counters for the next batch of 10 lines
             dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+            s = 0
+
