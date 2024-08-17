@@ -37,10 +37,9 @@ for i in sys.stdin:
             dct[code] = v
         c += 1
         if c == 10:
+            print('File size: {}'.format(s))
             for k, v in dct.items():
                 if v > 0:
                     print(f'{k}: {v}')
-            print('File size: {}'.format(s))
             c = 0
-            s = 0
             dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
