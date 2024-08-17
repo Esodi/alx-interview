@@ -23,7 +23,8 @@ signal.signal(signal.SIGINT, exiting)
 c, s = 0, 0
 nlst = []
 dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
-pat = r'(?P<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(?P<datetime>[^\]]+)\] "(?P<method>[A-Z]+) (?P<endpoint>[^\s]+) HTTP/(?P<version>\d+\.\d+)" (?P<status>\d{3}) (?P<size>\d+)'
+pat = r'^(\d+\.\d+\.\d+\.\d+) - \[([^\]]+)\] "GET /projects/\d+ HTTP/1\.1" (\d{3}) (\d+)$'
+
 for i in sys.stdin:
     line = i.strip()
     if re.match(pat, line):
