@@ -21,25 +21,29 @@ def exiting(sig, frame):
 signal.signal(signal.SIGINT, exiting)
 
 c, s = 0, 0
-nlst = []
 dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
 pat = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,7})\] "([A-Z]+) (/projects/\d+) HTTP/1\.1" (\d{3}) (\d+)'
 
-for i in sys.stdin:
-    line = i.strip()
-    if re.match(pat, line):
-        lst = line.split(' ')
-        s += int(lst[-1])
-        code = int(lst[-2])
-        nlst.append(code)
-        if code in dct:
-            v = int(dct[code]) + 1
-            dct[code] = v
-        c += 1
-        if c == 10:
-            print('File size: {}'.format(s))
-            for k, v in dct.items():
-                if v > 0:
-                    print(f'{k}: {v}')
-            c = 0
-            dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+try:
+    for i in sys.stdin:
+        line = i.strip()
+        if re.fullmatch(pat, line):
+            lst = line.split(' ')
+            s += int(lst[-1])
+            code = int(lst[-2])
+            if code in dct:
+                v = int(dct[code]) + 1
+                dct[code] = v
+            c += 1
+            if c == 10:
+                print('File size: {}'.format(s))
+                for k, v in dct.items():
+                    if v > 0:
+                        print(f'{k}: {v}')
+                c = 0
+                dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+finally:
+    print('File size: {}'.format(s))
+    for k, v in dct.items():
+        if v > 0:
+            print(f'{k}: {v}')
