@@ -1,46 +1,45 @@
 #!/usr/bin/python3
 '''
-script that reads stdin line by line and computes metrics
+ script that reads stdin line by line and computes metrics
 '''
 
+import os
 import sys
+import signal
 import re
-from collections import defaultdict
 
-def process_line(line):
-    # Regular expression for parsing the log line
-    regex = r'^(\d+\.\d+\.\d+\.\d+) - \[([^\]]+)\] "GET /projects/\d+ HTTP/1\.1" (\d{3}) (\d+)$'
-    match = re.match(regex, line)
-    if match:
-        ip_address, date, status_code, file_size = match.groups()
-        return int(status_code), int(file_size)
-    return None, None
 
-def print_statistics(total_size, status_counts):
-    print(f"File size: {total_size}")
-    for status_code in sorted(status_counts):
-        print(f"{status_code}: {status_counts[status_code]}")
+def exiting(sig, frame):
+    ''' func for ctrl + c '''
+    for k, v in dct.items():
+        if v > 0:
+            print(f'{k}: {v}')
+    print('File size: {}'.format(s))
+    sys.exit(0)
 
-def main():
-    total_size = 0
-    status_counts = defaultdict(int)
-    line_count = 0
 
-    try:
-        for line in sys.stdin:
-            line = line.strip()
-            status_code, file_size = process_line(line)
-            if status_code and file_size is not None:
-                total_size += file_size
-                status_counts[status_code] += 1
-                line_count += 1
+signal.signal(signal.SIGINT, exiting)
 
-                if line_count % 10 == 0:
-                    print_statistics(total_size, status_counts)
-                    
-    except KeyboardInterrupt:
-        print_statistics(total_size, status_counts)
+c, s = 0, 0
+nlst = []
+dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
+pat = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}) - \[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,7})\] "([A-Z]+) (/projects/\d+) HTTP/1\.1" (\d{3}) (\d+)'
 
-if __name__ == "__main__":
-    main()
-
+for i in sys.stdin:
+    line = i.strip()
+    if re.match(pat, line):
+        lst = line.split(' ')
+        s += int(lst[-1])
+        code = int(lst[-2])
+        nlst.append(code)
+        if code in dct:
+            v = int(dct[code]) + 1
+            dct[code] = v
+        c += 1
+        if c == 10:
+            print('File size: {}'.format(s))
+            for k, v in dct.items():
+                if v > 0:
+                    print(f'{k}: {v}')
+            c = 0
+            dct = {200: 0, 301: 0, 400: 0, 401: 0, 403: 0, 404: 0, 405: 0, 500: 0}
