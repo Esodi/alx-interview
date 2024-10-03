@@ -3,6 +3,7 @@
 
 
 def isWinner(x, nums):
+    '''the function itself'''
     def sieve_of_eratosthenes(n):
         ''' function iswinner'''
         if n < 2:
